@@ -51,6 +51,15 @@ public class Carta {
         }
     }
 
+    public String mostrarCarta(){
+        if (tipo == TipoCarta.NUMERO) {
+            return numero + "" + color;
+        } else {
+            return codigoTipoCarta() + "" + color;
+        }
+    }
+
+
     // Método para obtener el código del tipo de carta
     private String codigoTipoCarta (){
         String codigo="";
@@ -77,7 +86,7 @@ public class Carta {
     }
 
     //Metodo para obtener el nombre del color
-    private String nombreColor(){
+    public String nombreColor(){
         String nombre="";
         switch (this.color){
             case R:

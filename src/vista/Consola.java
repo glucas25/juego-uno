@@ -4,6 +4,7 @@ import model.Carta;
 import model.Jugador;
 import model.LineaJuego;
 import model.Color;
+import controlador.Validador;
 import java.util.Scanner;
 
 public class Consola {
@@ -22,7 +23,7 @@ public class Consola {
     
     // Estilos
     private static final String NEGRITA = "\u001B[1m";
-    private static final String FONDO_BLANCO = "\u001B[47m";
+    //private static final String FONDO_BLANCO = "\u001B[47m";
     private static final String FONDO_ROJO = "\u001B[41m";
     private static final String FONDO_AMARILLO = "\u001B[43m";
     private static final String FONDO_VERDE = "\u001B[42m";
@@ -64,6 +65,11 @@ public class Consola {
         System.out.println("║               ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝                  ║");
         System.out.println("║                                                           ║");
         System.out.println("║              ¡Bienvenido al Juego de UNO!                 ║");
+        System.out.println("║                                                           ║");
+        System.out.println("║                                                           ║");
+        System.out.println("║                   - Cristina Luna                         ║");
+        System.out.println("║                   - Efrain Valdiviezo                      ║");
+        System.out.println("║                   - Gabriel Lucas                         ║");
         System.out.println("║                                                           ║");
         System.out.println("╚═══════════════════════════════════════════════════════════╝");
         System.out.println(RESET);
@@ -117,7 +123,7 @@ public class Consola {
         
         System.out.println(colorFondo + colorTexto + "┌─────────┐" + RESET);
         System.out.println(colorFondo + colorTexto + "│         │" + RESET);
-        System.out.println(colorFondo + colorTexto + "│  " + NEGRITA + String.format("%-5s", carta.toString()) + RESET + colorFondo + colorTexto + "  │" + RESET);
+        System.out.println(colorFondo + colorTexto + "│  " + NEGRITA + String.format("%-5s", carta.mostrarCarta()) + RESET + colorFondo + colorTexto + "  │" + RESET);
         System.out.println(colorFondo + colorTexto + "│         │" + RESET);
         System.out.println(colorFondo + colorTexto + "└─────────┘" + RESET);
     }
@@ -129,6 +135,8 @@ public class Consola {
         System.out.println(MAGENTA + "└──────────────────────┘" + RESET);
         
         // Mostrar color activo si es diferente al de la carta
+
+        
         if (linea.getColorActivo() != linea.getUltimaCartaJuego().getColor()) {
             String colorTexto = obtenerColorANSI(linea.getColorActivo());
             System.out.println(colorTexto + NEGRITA + "⚠ Color activo: " + linea.getColorActivo() + RESET);
@@ -159,7 +167,7 @@ public class Consola {
     }
     
     // Método para mostrar el estado completo del juego
-    public void mostrarEstadoJuego(LineaJuego linea, Jugador jugador, Jugador maquina, boolean cambioColor, Color colorActivo) {
+    public void mostrarEstadoJuego(LineaJuego linea, Jugador jugador, Jugador maquina) {
         limpiarConsola();
         mostrarSeparador();
         
@@ -169,9 +177,6 @@ public class Consola {
         // Mostrar carta en juego
         mostrarLineaDeJuego(linea);
 
-        if (cambioColor){
-            mostrarCambioColor(colorActivo);
-        }
         
         // Mostrar mano del jugador
         mostrarManoJugador(jugador);
@@ -252,14 +257,14 @@ public class Consola {
     
     // Método para mostrar mensaje de jugada inválida
     public void mostrarJugadaInvalida() {
-        System.out.println("\n" + ROJO + NEGRITA + "✗ ¡Jugada inválida! Esa carta no se puede jugar." + RESET);
+        System.out.println("\n" + ROJO + NEGRITA + "✗ ¡Jugada inválida! Esa carta no se puede jugar.\n " + Validador.mensajeError + RESET);
         pausa(2000);
     }
     
     // Método para mostrar que un jugador robó carta(s)
     public void mostrarRobarCarta(String nombreJugador, int cantidad) {
         String cartas = cantidad == 1 ? "carta" : "cartas";
-        System.out.println("\n" + AMARILLO + "➤ " + nombreJugador + " robó " + cantidad + " " + cartas + " 🃏" + RESET);
+        System.out.println("\n" + AMARILLO + "➤ " + nombreJugador.toUpperCase() + " robó " + cantidad + " " + cartas + " 🃏" + RESET);
         pausa(1500);
     }
     

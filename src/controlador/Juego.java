@@ -12,8 +12,6 @@ public class Juego {
     private LineaJuego lineaJuego;
     private boolean turnoJugador=true;
     private boolean saltarTurno=false;
-    private boolean cambioColor=false;
-    private Color colorActivo;
     
 
     public Juego(){
@@ -22,11 +20,11 @@ public class Juego {
         // Mostrar el título del juego al iniciar el juego
         this.consola.mostrarTitulo();
 
-            Scanner scanner = new Scanner(System.in);
+            Scanner sc = new Scanner(System.in);
             //Solicitar el nombre del jugador
             this.consola.mostrarMensaje("Ingrese el nombre del Jugador: ");
             System.out.print("➤ ");
-            String nombreJugador = scanner.nextLine().trim();
+            String nombreJugador = sc.nextLine().trim();
             this.jugador = new Jugador(nombreJugador,true);
     
 
@@ -70,9 +68,9 @@ public class Juego {
 
     public void jugar() {
         while (true) {
-            consola.mostrarEstadoJuego(lineaJuego,jugador, maquina,cambioColor,colorActivo);
+            consola.mostrarEstadoJuego(lineaJuego,jugador, maquina);
             //controlador para presentar por pantalla cuando halla cambio de color
-            cambioColor=false;
+            
 
             //Indicar de quien es el turno
             if (turnoJugador){
@@ -88,6 +86,8 @@ public class Juego {
                 turnoMaquina();
             }
             
+
+
             //Cambiar turno
             cambiarTurno();
             
@@ -100,63 +100,63 @@ public class Juego {
     }
     
     public void turnoJugador() {
-        // Leer el índice directamente desde consola
-        int indiceCarta = consola.leerIndiceCartaJugador(jugador.getCantidadCartas());
-        
-        // Si el jugador elige 0, roba una carta y termina el turno
-        if (indiceCarta == 0) {
-            consola.mostrarMensaje("Has decidido robar una carta.");
-            robarCartas(jugador, 1);
-            consola.pausa(1500);
-            consola.esperarEnter("Presione enter continuar con el siguiente turno...");
-            return; // Termina el turno
+        Carta cartaSeleccionada = null;
+        int indiceArray = -1;
+
+        while (true) {
+            int indiceCarta = consola.leerIndiceCartaJugador(jugador.getCantidadCartas());
+
+            if (indiceCarta == 0) {
+                consola.mostrarMensaje("Has decidido robar una carta.");
+                robarCartas(jugador, 1);
+                consola.pausa(1500);
+                consola.esperarEnter("Presione enter para continuar con el siguiente turno...");
+                return; // Termina el turno
+            }
+
+            indiceArray = indiceCarta - 1;
+            cartaSeleccionada = jugador.getCarta(indiceArray);
+
+            if (Validador.validarJugada(cartaSeleccionada, lineaJuego)) {
+                break; // La carta es válida, salimos del bucle.
+            } else {
+                consola.mostrarJugadaInvalida(); // Muestra el error y el bucle vuelve a empezar.
+            }
         }
-        
-        // Convertir a índice de array (el usuario ve 1-7, pero el array es 0-6)
-        int indiceArray = indiceCarta - 1;
-        
-        // Obtener la carta seleccionada (SIN quitarla todavía)
-        Carta cartaSeleccionada = jugador.getCarta(indiceArray);
-        
-        //Validar la carta antes de realizar algun procedimiento
-        if (!Validador.validarJugada(cartaSeleccionada, lineaJuego)) {
-            // La carta no es válida
-            consola.mostrarJugadaInvalida();
-            // Volver a pedir que elija otra carta
-            turnoJugador();
-            return;
-        }
-        
         
         // Quitar la carta de la mano del jugador
         jugador.quitarCarta(indiceArray);
         
         // Agregar la carta a la línea de juego
         lineaJuego.addCartaJuego(cartaSeleccionada);
-        
-        // Si es un comodín negro, pedir el color
-        if (cartaSeleccionada.getColor() == Color.N) {
-            Color colorElegido = consola.leerColorSeleccionado();
-            lineaJuego.setColorActivo(colorElegido);
-            cambioColor = true;
-            colorActivo = colorElegido;
-            consola.mostrarMensaje("Color cambiado a: " + colorElegido);
-            consola.pausa(1000);
-        }
-        
+
+
         // Mostrar la carta jugada
         consola.mostrarMensaje("Has jugado: " + cartaSeleccionada.toString());
         consola.pausa(1000);
         
+
+        // Si es un comodín negro, pedir el color
+        if (cartaSeleccionada.getColor() == Color.N) {
+            Color colorElegido = consola.leerColorSeleccionado();
+            lineaJuego.setColorActivo(colorElegido);
+            consola.mostrarMensaje("Color cambiado a: " + colorElegido);
+            consola.pausa(1000);
+        } else {
+            lineaJuego.setColorActivo(cartaSeleccionada.getColor());
+        }
+        
+        
+        
         // Aplicar efectos especiales de la carta
         aplicarEfectoEspecial(cartaSeleccionada);
         
-        consola.esperarEnter("Presione enter continuar con el siguiente turno...");
+        consola.esperarEnter("Presione enter para continuar con el siguiente turno...");
     }
 
     
     public void turnoMaquina(){
-        consola.mostrarMensaje("La máquina está pensando...");
+        consola.mostrarMensaje(maquina.getNombre() + " está pensando...");
         consola.pausa(1500);
         
         boolean cartaJugada = false;
@@ -171,39 +171,42 @@ public class Juego {
                 // Agregar a la línea de juego
                 lineaJuego.addCartaJuego(carta);
                 
+                // Mostrar la carta jugada
+                consola.mostrarMensaje(maquina.getNombre() + " ha jugado: " + carta.toString());
+                consola.pausa(1000);
+
                 // Si es comodín negro, elegir color
                 if (carta.getColor() == Color.N) {
                     Color colorElegido = elegirColorMaquina();
                     lineaJuego.setColorActivo(colorElegido);
-                    cambioColor = true;
-                    colorActivo = colorElegido;
                     
                     //Mostrar la  eleccion de la maquina
-                    consola.mostrarMensaje("La máquina elige el color: " + colorElegido);
+                    consola.mostrarMensaje(maquina.getNombre() + " elige el color: " + colorElegido);
                     consola.pausa(1000);
+                } else {
+                    lineaJuego.setColorActivo(carta.getColor());
                 }
                 
-                // Mostrar la carta jugada
-                consola.mostrarMensaje("La máquina ha jugado: " + carta.toString());
-                consola.pausa(1000);
+                
                 
                 // Aplicar efectos especiales
                 aplicarEfectoEspecial(carta);
-                
                 cartaJugada = true;
+                
+            
+
                 // Salir del bucle
                 break;
             }
         }
-        
         // Si no encontró carta válida, roba una carta
         if (!cartaJugada) {
-            consola.mostrarMensaje("La máquina no tiene jugada válida y roba una carta.");
+            consola.mostrarMensaje(maquina.getNombre() + " no tiene jugada válida y roba una carta.");
             robarCartas(maquina, 1);
             consola.pausa(1000);
         }
 
-        consola.esperarEnter("Presione enter continuar con el siguiente turno...");
+        consola.esperarEnter("Presione enter para continuar con el siguiente turno...");
     }
 
 

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 public class LineaJuego {
     private ArrayList<Carta> linea;
     private Color colorActivo;
-    private Baraja baraja;
     
     //Constructor por defecto
     public LineaJuego() {
@@ -15,23 +14,32 @@ public class LineaJuego {
 
     //Getter de la linea de juego
     public ArrayList<Carta> getLinea() {
-        return linea;;
+        return linea;
     }
 
 
     //Obtener el color activo de la ultima carta en la linea de juego
     public Color getColorActivo() {
-        if (this.linea.isEmpty()) {
+        //if (this.linea.isEmpty()) {
+        //    return null;
+        //}
+        if (this.colorActivo != null) {
+            return this.colorActivo;
+        } else {
             return null;
         }
-        Carta ultimaCarta = this.linea.get(this.linea.size() - 1);
-        colorActivo = ultimaCarta.getColor();
-        return colorActivo;
+
+        //return this.getUltimaCartaJuego().getColor();
+        //Carta ultimaCarta = this.linea.get(this.linea.size() - 1);
+        //colorActivo = ultimaCarta.getColor();
+        //return ultimaCarta.getColor();
+        //return this.colorActivo;
     }
 
     //Metodo para cambair el color activo
     public void setColorActivo(Color color) {
         this.colorActivo = color;
+
     }
 
 
@@ -54,12 +62,16 @@ public class LineaJuego {
             for(int i=0;i<baraja.getCartas().size();i++){
                 if(baraja.getCartas().get(i).getTipo()==TipoCarta.NUMERO){
                     this.linea.add(baraja.getCartas().get(i));
+                    //Actualizar color activo
+                    this.setColorActivo(baraja.getCartas().get(i).getColor());
                     return baraja.getCartas().remove(i);
                 }
             }
             
         }
         this.linea.add(baraja.getCartas().get(0));
+        //Actualizar color activo
+        this.setColorActivo(baraja.getCartas().get(0).getColor());
         return baraja.getCartas().remove(0);
     }
 
